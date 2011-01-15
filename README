@@ -1,13 +1,13 @@
 # twimemo
 
-FIXME: write description
+twimemo is a memo service for twitter users.
 
 ## Usage
 
-FIXME: write
+Access the URL http://???.
 
 ## License
 
-Copyright (C) 2010 FIXME
+Copyright (C) 2011 Masayuki Muto
 
 Distributed under the Eclipse Public License, the same as Clojure.
