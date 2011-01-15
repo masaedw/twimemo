@@ -4,4 +4,5 @@
                  [org.clojure/clojure-contrib "1.2.0"]
                  [compojure "0.5.3"]
                  [ring/ring-jetty-adapter "0.3.1"]]
-  :dev-dependencies [[swank-clojure "1.2.1"]])
+  :dev-dependencies [[appengine-magic "0.3.2"]
+                     [swank-clojure "1.2.1"]])
