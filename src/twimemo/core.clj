@@ -57,6 +57,9 @@
     (pr-str memo)
     ))
 
+(defn hoge [req]
+  )
+
 (defroutes twimemo-app-handler
   (GET "/memos/create" req (create-memo req))
   (POST "/memos/create" req (create-memo! req))
@@ -64,7 +67,7 @@
   (GET "/memos/:id" req (show-memo req))
   (GET "/" req (index-memo req))
   (GET "/hoge" req
-       "hoge")
+       (hoge req))
   (ANY "*" _
        {:status 404
         :headers {"Content-Type" "text/plain"}
@@ -72,7 +75,15 @@
 
 (ae/def-appengine-app twimemo-app #'twimemo-app-handler)
 
-;; (use :reload 'twimemo.core)
-;; (require '[appengine-magic.core :as ae])
-;; (ae/start twimemo-app :port 8080)
-;; (require '[appengine-magic.services.datastore :as ds])
+#_(do
+  (use :reload 'twimemo.core)
+  (require '[appengine-magic.core :as ae])
+  (ae/start twimemo-app :port 8080)
+  (require '[appengine-magic.services.datastore :as ds])
+  (import [com.google.appengine.tools.development.testing
+           LocalServiceTestHelper
+           LocalServiceTestConfig
+           LocalDatastoreServiceTestConfig])
+  (def helper (LocalServiceTestHelper. (into-array LocalServiceTestConfig [(LocalDatastoreServiceTestConfig.)])))
+  (.setUp helper)
+  )
