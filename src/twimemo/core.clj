@@ -53,7 +53,7 @@
 
 (defn show-memo [req]
   (let [id (get-in req [:params "id"])
-        memo (ds/query :kind Memo :filter (= :id id))]
+        memo (ds/retrieve Memo id)]
     (pr-str memo)
     ))
 
