@@ -2,11 +2,13 @@
   (:use compojure.core
         ring.util.response)
   (:require [appengine-magic.core :as ae]
-            [appengine-magic.services.datastore :as ds])
-  (:import java.util.Date
+            [appengine-magic.services.datastore :as ds]
+            [clojure.contrib.str-utils2 :as s])
+  (:import java.util.Calendar
+           java.util.Date
            java.util.UUID))
 
-(ds/defentity Memo [^:key uuid content users])
+(ds/defentity Memo [^:key uuid content users date])
 
 (defn uuid []
   (str (UUID/randomUUID)))
@@ -25,7 +27,7 @@
 
 (defn create-memo! [req]
   (let [content (get-in req [:params "memo"])
-        x (Memo. (uuid) content nil)]
+        x (Memo. (uuid) content nil (-> (Calendar/getInstance) .getTime))]
     (ds/save! x)
     (redirect "/memos")))
 
@@ -33,11 +35,8 @@
   (format "<a href='%s'>%s</a>" url name))
 
 (defn link-to-memo [memo]
-  (link-to (format "/memos/%s" (:id memo))
-           (format "memo-%s" (:id memo))))
-
-(defn join [s coll]
-  (pr-str (interpose s coll)))
+  (link-to (format "/memos/%s" (:uuid memo))
+             (format "memo-%s" (:uuid memo))))
 
 (defn index-memo [req]
   (str
@@ -46,7 +45,9 @@
   <head></head>
   <body>
     <h1>メモの一覧</h1>"
-   (join "<br>" (map link-to-memo (ds/query :kind Memo)))
+   (s/join "<br>" (map link-to-memo (ds/query :kind Memo)))
+   "<br>"
+   (link-to "/memos/create" "新規作成")
    "
   </body>
 </html>"))
@@ -54,10 +55,23 @@
 (defn show-memo [req]
   (let [id (get-in req [:params "id"])
         memo (ds/retrieve Memo id)]
-    (pr-str memo)
-    ))
+    (str
+     "<html>
+  <head></head>
+  <body>"
+     (link-to "/memos" "一覧へ")
+     "
+    <h1>メモの詳細</h1>"
+     (pr-str memo)
+    "
+  </body>
+</html>"
+    )))
 
 (defn hoge [req]
+  (doseq [memo (ds/query :kind Memo)]
+    (ds/delete! memo))
+  "deleted!"
   )
 
 (defroutes twimemo-app-handler
@@ -76,9 +90,9 @@
 (ae/def-appengine-app twimemo-app #'twimemo-app-handler)
 
 #_(do
-  (use :reload 'twimemo.core)
-  (require '[appengine-magic.core :as ae])
-  (ae/start twimemo-app :port 8080)
+    (use :reload 'twimemo.core)
+    (require '[appengine-magic.core :as ae])
+    (ae/start twimemo-app :port 8080)
   (require '[appengine-magic.services.datastore :as ds])
   (import [com.google.appengine.tools.development.testing
            LocalServiceTestHelper
